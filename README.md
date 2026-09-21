@@ -109,11 +109,12 @@ Morrow House — what it's actually like: The good: cheapest housing tier by abo
 <!-- One complete question and answer, pasted as text, with the source line
      visible. Milestone 4. -->
 
-**Question:**
+**Question:** Should I expect noise at Fenwick Court?
 
 **Answer:**
 
 ```
+Yes, you can expect noise at Fenwick Court due to thin walls between suites and kitchenettes that carry sound (housing_fenwick_court_noise.txt).
 ```
 
 **My relevance cutoff:**
@@ -127,9 +128,23 @@ Morrow House — what it's actually like: The good: cheapest housing tier by abo
 
      Milestone 4. -->
 
+I kept the starter's default, **0.6**. In-scope best distances ranged 0.132
+to 0.286; every out-of-scope question scored 0.787 to 0.915 — a clean gap of
+roughly 0.5 with nothing in between, and 0.6 sits in the middle of it rather
+than close to either edge.
+
 | Question | In corpus? | Best distance |
 |---|---|---|
-|  |  |  |
+| What are the timings for North Kitchen? | Yes | 0.286 |
+| What is the room type in Aldridge Hall? | Yes | 0.277 |
+| Should I expect noise at Fenwick Court? | Yes | 0.275 |
+| What is the best time to do laundry at Tamsin Court? | Yes | 0.132 |
+| What are the timings for the campus shuttle? | Yes | 0.248 |
+| What is the capital of Mongolia? | No | 0.787 |
+| How do I change the oil in a diesel engine? | No | 0.915 |
+| Who won the 1994 World Cup? | No | 0.846 |
+| What is the recommended dosage of ibuprofen for a headache? | No | 0.848 |
+| How do I write a for loop in Rust? | No | 0.863 |
 
 ## How I Used AI
 

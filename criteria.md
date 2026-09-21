@@ -59,8 +59,22 @@ in at least 4 of 5 tries.
      just keep five of them, or the "4 of 5" above has nothing to be 4 of. -->
 
 **Why this target:**
-<!-- PENDING — fill in after Milestone 4, once the actual distance gap
-     between in-scope and out-of-scope questions has been measured. -->
+When I measured distances in Milestone 4, the gap between in-corpus and
+out-of-scope questions was unusually clean — no overlap at all. In-scope
+questions (timings, room details, noise complaints) had best distances
+ranging from 0.132 to 0.286, while every out-of-scope question (general
+knowledge, unrelated domains like Rust or medicine) scored between 0.787 and
+0.915. That's a gap of roughly 0.5, with nothing landing in the middle. I set
+my threshold at 0.6 — the starter's default — since it sits comfortably in
+the center of that gap rather than close to either edge.
+
+Given how wide and clean this separation is, I'd actually expect the gate to
+catch close to 5 of 5 out-of-scope questions in practice. I'm still
+targeting 4 of 5 rather than 5 of 5 because my test set is small — only five
+out-of-scope questions — and a topic I haven't tested yet (something that
+shares more vocabulary with my corpus than "Mongolia" or "diesel engines" do)
+could plausibly score closer to the boundary than anything I've measured so
+far.
 
 ---
 
