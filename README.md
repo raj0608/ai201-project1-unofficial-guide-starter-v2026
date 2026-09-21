@@ -1,6 +1,6 @@
 # The Unofficial Guide
 
-<!-- Replace this line with your name and which corpus you picked. -->
+Rohan Raj — corpus: `campus_life`
 
 > **This file is your submission.** Fill it in as you go — most sections get
 > written during the milestone that produces them, not at the end.
@@ -26,6 +26,15 @@
      this repo.
 
      Milestone 5. -->
+
+This is a retrieval-augmented Q&A system built on the `campus_life` corpus —
+88 short, first-person student write-ups about dining halls, housing,
+courses, and campus services. It answers specific factual questions like
+dining hall hours, room types, noise levels in a particular building, or
+when the laundry room is least busy, and every answer names the exact
+document it came from. Questions outside the corpus — general knowledge,
+unrelated domains — get an honest "I don't have enough information" instead
+of a guess.
 
 ## Chunking Strategy
 
@@ -157,9 +166,22 @@ than close to either edge.
 
      Milestone 5. -->
 
-**1.**
+**1.** I asked Claude to design a chunker that would keep a post's subject
+(its title line, e.g. "North Kitchen") attached to the content chunks that
+follow it, since a full sentence like "Hours are 11:00am to 7:00pm weekdays"
+means nothing without knowing which building it's about. It offered two
+designs: bake the title into each chunk's text as a prefix, or store it as
+Chroma metadata for later filtering. I picked the text-prefix version —
+metadata filtering was more scope than Milestone 3 asked for, and baking it
+into the text was the simpler fix for the actual problem I'd found.
 
-**2.**
+**2.** While writing criterion #2's "why," I claimed the source-citation
+rule was "enforced in the prompt template itself." Claude checked
+`generate.py` and pointed out that's not true — the grounding instruction
+only *asks* the model to name a file; there's no code that checks the
+response actually contains one. I changed the wording from "enforced" to
+"instructed" so the criterion's reasoning matched what the code actually
+guarantees, instead of overstating it.
 
 <!-- ── Stretch features ─────────────────────────────────────────────────────
      Doing one? Say so here BEFORE you start. A feature this README never
