@@ -23,8 +23,13 @@ For at least 4 of my 5 test questions, the retrieved chunks include one that
 contains the answer.
 
 **Why this target:**
-<!-- e.g. "One of my questions is about a topic only two documents mention, so
-     I expect that one to be hard." -->
+My corpus has some topics covered by multiple documents (e.g., dining halls
+come up in several student write-ups) and some covered by just one mention
+(e.g., one specific professor's grading style). I expect the single-mention
+questions to be harder to retrieve reliably, since there's only one chunk in
+the whole corpus that could possibly answer them — if that chunk isn't
+embedded well or gets outranked by something more generic, retrieval misses
+it entirely.
 
 ---
 
@@ -33,8 +38,12 @@ contains the answer.
 Every answer the system produces names at least one source document.
 
 **Why this target:**
-<!-- Why all five and not four? What about your setup makes that achievable —
-     or what would have to go wrong for it not to be? -->
+My generation prompt instructs the model to include a source filename before
+giving an answer — it's a prompt-level instruction, not a code-enforced
+constraint, so it's not guaranteed the model always complies. Since this is a
+formatting requirement rather than a content judgment, I'm betting it holds
+every time the pipeline completes without erroring, which is why I'm setting
+this at 5 of 5 instead of 4 of 5.
 
 ---
 
@@ -50,47 +59,42 @@ in at least 4 of 5 tries.
      just keep five of them, or the "4 of 5" above has nothing to be 4 of. -->
 
 **Why this target:**
-<!-- What did your distances look like when you set the cutoff in Milestone 4?
-     Was there a clean gap, or did the two groups overlap? -->
+<!-- PENDING — fill in after Milestone 4, once the actual distance gap
+     between in-scope and out-of-scope questions has been measured. -->
 
 ---
 
-## 4. Something about your chunks
+## 4. Chunks read as complete thoughts
 
-<!-- YOU WRITE THIS ONE.
-
-     How would you know if your chunks were the right size? Name something
-     countable or observable.
-
-     Examples of the right shape — don't copy these, they should come from
-     what you actually saw in Milestone 3:
-       - "At least 4 of 5 sampled chunks read as a complete thought, with no
-          sentence cut in half at either end."
-       - "No chunk is shorter than 200 characters, since anything below that
-          in my corpus turned out to be a heading with no content under it." -->
-
-
+At least 4 out of 5 sampled chunks read as a complete thought, with no
+sentence cut in half.
 
 **Why this target:**
-
-
+I switched from a fixed-character chunker to splitting on paragraph breaks in
+Milestone 3. Most entries in my corpus are short, self-contained write-ups —
+one paragraph per opinion or fact (e.g., one paragraph about a dining hall,
+one about a professor) — so paragraph boundaries should naturally align with
+complete thoughts. I'm not claiming 5 of 5 because a few entries in my corpus
+run to multiple paragraphs on one topic, and my chunk size cap could still
+split one of those mid-thought.
 
 ---
 
-## 5. Your choice
+## 5. Citations point to the right source, not just any source
 
-<!-- YOU WRITE THIS ONE TOO.
-
-     Pick something you actually care about getting right. It could be about
-     speed, about refusals, about a particular kind of question your corpus
-     handles badly, about source attribution being correct rather than merely
-     present — anything, as long as it names a number or an observable
-     outcome. -->
-
-
+When the system cites a source, that source actually contains the specific
+fact used in the answer — not just any retrieved document — in at least 4 of
+5 answered questions.
 
 **Why this target:**
-
+My corpus has several documents that touch the same general subject — for
+example, multiple entries mention dining halls, or multiple entries mention
+housing. That means the system can retrieve a document that's topically
+related but doesn't actually contain the specific fact it's citing. Criterion
+2 only checks that a source is named at all; this one checks whether it's the
+correct source. I set the bar at 4 of 5 rather than 5 of 5 because when two
+retrieved chunks are semantically close, the higher-ranked one isn't always
+the one holding the exact fact.
 
 
 ---
