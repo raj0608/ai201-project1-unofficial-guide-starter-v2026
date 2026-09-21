@@ -80,24 +80,74 @@ def fallback_split(
     return chunks
 
 
+def _is_title_paragraph(paragraph: str) -> bool:
+    """A short, single-line, unpunctuated opening paragraph — e.g. "North
+    Kitchen" or "On the housing lottery" — as opposed to a sentence."""
+    return (
+        "\n" not in paragraph
+        and len(paragraph) < 100
+        and not paragraph.rstrip().endswith((".", "!", "?"))
+    )
+
+
 def split_documents(documents: list[Document]) -> list[Chunk]:
     """
-    Split documents into chunks. ⚠️ REPLACE THE BODY OF THIS IN MILESTONE 3.
+    Split each document on paragraph breaks (`ingest.clean_text` already
+    collapses blank-line runs to exactly one, so "\\n\\n" reliably marks a
+    paragraph boundary).
 
-    Right now it just calls the fallback. That is the plain, generic behaviour
-    the brief is talking about.
+    Every campus_life post opens with a title-only line — "North Kitchen",
+    "On the housing lottery" — followed by one to four content paragraphs.
+    A sentence-complete paragraph like "Hours are 11:00am to 7:00pm weekdays"
+    is still meaningless on its own without knowing which building or place
+    it's about, so that title gets prefixed onto every paragraph that follows
+    it, and is not emitted as a chunk by itself.
 
-    When you write your own strategy, set `produced_by` to
-    "chunker.py::split_documents" so your README's Sample Chunks section names
-    the right function. `app.py chunks` prints that string for you.
-
-    Things worth thinking about before you write any code:
-      - Are your documents short posts or long guides?
-      - Is the useful information in one sentence, or spread over a paragraph?
-      - Would splitting on paragraph breaks keep more thoughts intact than
-        splitting on a character count?
+    A paragraph longer than CHUNK_SIZE — rare in this corpus, but not
+    impossible — still gets split on a character window with overlap, so no
+    chunk grows unbounded (see criterion 4's "why" in criteria.md).
     """
-    return fallback_split(documents)
+    chunk_size = config.CHUNK_SIZE
+    overlap = config.CHUNK_OVERLAP
+    chunks: list[Chunk] = []
+
+    for doc in documents:
+        paragraphs = [p.strip() for p in doc.text.split("\n\n") if p.strip()]
+        if not paragraphs:
+            continue
+
+        title = None
+        body = paragraphs
+        if len(paragraphs) > 1 and _is_title_paragraph(paragraphs[0]):
+            title = paragraphs[0]
+            body = paragraphs[1:]
+
+        index = 0
+        for paragraph in body:
+            piece = f"{title}: {paragraph}" if title else paragraph
+
+            pieces = [piece]
+            if len(piece) > chunk_size:
+                pieces = []
+                start = 0
+                while start < len(piece):
+                    pieces.append(piece[start : start + chunk_size])
+                    start += chunk_size - overlap
+
+            for text in pieces:
+                text = text.strip()
+                if text:
+                    chunks.append(
+                        Chunk(
+                            text=text,
+                            source=doc.source,
+                            index=index,
+                            produced_by="chunker.py::split_documents",
+                        )
+                    )
+                    index += 1
+
+    return chunks
 
 
 def describe(chunks: list[Chunk]) -> str:
