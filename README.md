@@ -212,16 +212,28 @@ guarantees, instead of overstating it.
 |---|---|---|---|---|---|
 | 1. Retrieved chunk contains the answer | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
 | 2. Every answer names a source | 5 of 5 | 5/5 | 5/5 | 5/5 | MET |
-| 3. Gate stops out-of-corpus questions | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 3. Gate stops out-of-corpus questions | 4 of 5 (revised, see criteria.md) | 1/5 | 1/5 | 1/5 | MISSED |
 | 4. Chunks read as complete thoughts | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
 | 5. Citations point to the right source | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
 
-Produced by `run_eval.py::main` (results/run_2026-09-23_1612_before.md), with
-criterion 1 and 5 verified directly against retrieved chunk text rather than
-`scorer.py`'s answer-text check — see the note under criterion 1 below.
-Criteria 3 and 4 are single deterministic measurements (the gate and the
-chunker don't vary run to run), so the same number appears in all three
-columns, same as the worked example above.
+Produced by `run_eval.py::main` (results/run_2026-09-23_1612_before.md and
+results/run_2026-09-23_1632_before-tightened.md), with criterion 1 and 5
+verified directly against retrieved chunk text rather than `scorer.py`'s
+answer-text check — see the note under criterion 1 below. Criteria 3 and 4
+are single deterministic measurements (the gate and the chunker don't vary
+run to run), so the same number appears in all three columns, same as the
+worked example above.
+
+**A note on criterion 3.** The first pass, using the original 5
+unrelated-domain `OUT_OF_SCOPE` questions (Mongolia, diesel engines, etc.),
+came back 5/5, MET — the gate refused all five by a wide margin (best
+distances 0.787-0.915). But criterion 3's own "why" flagged a real
+suspicion: a topic sharing more vocabulary with the corpus might not be
+refused so cleanly. Testing that directly — five questions that each name a
+real corpus entity but ask a fact that entity's own documents don't cover —
+the gate refused only 1 of 5. See the revision under criterion 3 in
+`criteria.md` for the full reasoning; the numbers above are from the
+tightened test, which is now the operative one.
 
 <!-- Underneath, paste the REAL output for each criterion from one of your
      runs — the actual text your system produced, not a description of it.
@@ -257,15 +269,24 @@ The rooms in Aldridge Hall are doubles with a shared bathroom per floor. This in
 ```
 
 **Criterion 3 — real output** (produced by `run_eval.py::check_out_of_scope`,
-gate logic in `gate.py::check`):
+gate logic in `gate.py::check`, tightened test set):
 
 ```
-refused  (best distance 0.787)  What is the capital of Mongolia?
-refused  (best distance 0.915)  How do I change the oil in a diesel engine?
-refused  (best distance 0.846)  Who won the 1994 World Cup?
-refused  (best distance 0.848)  What is the recommended dosage of ibuprofen for a headache?
-refused  (best distance 0.863)  How do I write a for loop in Rust?
+refused       (best distance 0.620)  Does the health center offer dental care?
+LET THROUGH   (best distance 0.533)  Does North Kitchen have vegan options?
+LET THROUGH   (best distance 0.399)  Does Aldridge Hall have wifi in the dorm rooms?
+LET THROUGH   (best distance 0.377)  Is there parking available at Fenwick Court?
+LET THROUGH   (best distance 0.514)  Is the campus shuttle wheelchair accessible?
+-> gate refused 1 of 5
 ```
+
+Worth noting: even where the gate let a question through, the grounding
+instruction's second layer (`generate.py::GROUNDING_INSTRUCTION`) still
+caught it correctly every time — e.g. asking the full pipeline "Does North
+Kitchen have vegan options?" produced *"I do not have enough information to
+answer whether North Kitchen has vegan options"* rather than a guess. The
+system as a whole never hallucinated; specifically the *gate* just isn't
+the layer that's actually stopping these.
 
 **Criterion 4 — real output** (from Milestone 3's `python app.py chunks -n 5`,
 produced by `chunker.py::split_documents` — unchanged since then):

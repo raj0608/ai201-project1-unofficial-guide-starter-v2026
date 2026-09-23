@@ -76,6 +76,24 @@ shares more vocabulary with my corpus than "Mongolia" or "diesel engines" do)
 could plausibly score closer to the boundary than anything I've measured so
 far.
 
+> **Revised in Unit 2:** For at least 4 of 5 out-of-scope questions — each
+> naming a real corpus entity (a specific building, dining hall, or service)
+> but asking a fact that entity's documents don't cover — the relevance gate
+> stops it before generation.
+>
+> **Why revised:** The concern I named above turned out to be exactly right,
+> and worse than I expected. I replaced the five unrelated-domain questions
+> with five that name real entities (health center, North Kitchen, Aldridge
+> Hall, Fenwick Court, campus shuttle) and ask an uncovered fact about each.
+> The gate refused only 1 of 5 — a real entity name pulls the embedding
+> distance down regardless of whether the specific fact is present, so
+> "topically related" and "fact actually covered" are not the same thing to
+> a distance-based gate. This isn't a case of the original criterion being
+> unmeasurable — it was measured correctly, just against test questions too
+> easy to expose the actual failure mode. The target number (4 of 5) stays
+> the same; only the test questions get harder, which is why this is a
+> revision and not a lowered bar.
+
 ---
 
 ## 4. Chunks read as complete thoughts

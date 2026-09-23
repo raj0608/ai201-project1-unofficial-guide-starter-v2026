@@ -30,19 +30,39 @@ QUESTIONS = [
     {"question": "What are the timings for the campus shuttle?", "expects": "every 20 minutes"},
 ]
 
-# Questions from a different world entirely. Your gate should refuse all five.
+# ─── Unit 1's original OUT_OF_SCOPE, preserved for the record ───────────────
 #
-# There are five of these because criterion 3 in criteria.md names a target of
-# "at least 4 of 5" — you need five things to try before you can report 4 of 5.
-# `run_eval.py` runs these through retrieval and the gate on every eval and
-# records what happened, so criterion 3 has evidence in the run log alongside
-# the others. They cost no model calls: a refusal never reaches the model.
+# All five obviously-different-domain questions. The gate refused all five by
+# a wide margin (best distances 0.787-0.915 vs. the 0.6 cutoff) — a real
+# measurement, but one that never seriously tested the boundary. Kept here,
+# commented out rather than deleted, as evidence of what Milestone 4's
+# original cutoff was measured against.
+#
+# ORIGINAL_OUT_OF_SCOPE = [
+#     "What is the capital of Mongolia?",
+#     "How do I change the oil in a diesel engine?",
+#     "Who won the 1994 World Cup?",
+#     "What is the recommended dosage of ibuprofen for a headache?",
+#     "How do I write a for loop in Rust?",
+# ]
+
+# ─── Unit 2's harder OUT_OF_SCOPE, tightening criterion 3 ───────────────────
+#
+# Each one names a real building/place/service that IS in the corpus, and
+# asks a specific fact that ISN'T covered by it — unlike the originals above,
+# which were unrelated to the corpus in every way. This is deliberately the
+# hard case: distance-based retrieval can't tell "this chunk is about the
+# same building" from "this chunk actually answers the question," so a real
+# entity name pulls the distance down regardless of whether the fact is
+# there. `run_eval.py` runs these through retrieval and the gate and records
+# what happened, so criterion 3 has evidence in the run log alongside the
+# other four. They cost no model calls: a refusal never reaches the model.
 OUT_OF_SCOPE = [
-    "What is the capital of Mongolia?",
-    "How do I change the oil in a diesel engine?",
-    "Who won the 1994 World Cup?",
-    "What is the recommended dosage of ibuprofen for a headache?",
-    "How do I write a for loop in Rust?",
+    "Does the health center offer dental care?",
+    "Does North Kitchen have vegan options?",
+    "Does Aldridge Hall have wifi in the dorm rooms?",
+    "Is there parking available at Fenwick Court?",
+    "Is the campus shuttle wheelchair accessible?",
 ]
 
 
