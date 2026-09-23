@@ -183,6 +183,27 @@ response actually contains one. I changed the wording from "enforced" to
 "instructed" so the criterion's reasoning matched what the code actually
 guarantees, instead of overstating it.
 
+**3.** North Kitchen failed 3/3 in `scorer.py`'s pass/fail column in Unit 2,
+which looked like a real system failure at first. Claude read the actual
+answer text against the `expects` phrase and found the model wrote
+"11:00 am to 7:00 pm" (a space before am/pm) against an `expects` string of
+"11:00am to 7:00pm" — a formatting mismatch, not a wrong answer — and pointed
+out that criterion 1 is actually about the retrieved chunk, not the model's
+phrasing of it. I decided to verify chunk content directly instead of
+trusting the scorer's fails for that criterion, which is what actually
+surfaced the real miss (criterion 3) instead of chasing a fake one.
+
+**4.** For Milestone 4's tightened out-of-scope test, Claude proposed five
+"hard" questions naming real corpus entities and tested each one's actual
+retrieval distance before I picked which to keep. One candidate — "Does
+Innisfree Hall have air conditioning?" — looked like a strong
+generalization-failure example (distance 0.224, very low) until Claude
+actually read the source document and found it says "no air conditioning"
+directly, meaning the question was legitimately in-scope all along, not an
+uncovered fact. I dropped it rather than use a flawed example, which is why
+"What's Still Broken" above tells that story as a real near-miss instead of
+a clean win.
+
 <!-- ── Stretch features ─────────────────────────────────────────────────────
      Doing one? Say so here BEFORE you start. A feature this README never
      claims earns nothing.
@@ -457,9 +478,59 @@ trusting a low distance as a failure.
 
      Milestone 5. -->
 
+No criterion is currently MISSED after the fix. But I don't think the
+underlying problem is actually solved — only empirically patched for the
+entities I happened to test.
+
+`THRESHOLD = 0.33` was picked to separate one specific set of 12 distances
+(5 in-scope, 5 tuned-on hard out-of-scope, plus a stress-test of paraphrases).
+It's not a fix that provably generalizes to every future entity/uncovered-fact
+combination, because the actual mechanism — an embedding distance conflating
+"same topic" with "fact present" — is still there; I only found a number
+that happens to separate the cases I checked. A building or service with a
+shorter, sparser chunk than the ones in my test set could plausibly embed
+close enough to slip under 0.33 the same way the original 4 slipped under
+0.6. My own near-miss while testing this proves the boundary is fragile in
+the other direction too: "Does Innisfree Hall have air conditioning?" scored
+0.224 — squarely inside legitimate territory — and I almost logged it as a
+generalization failure before realizing the document actually says "no air
+conditioning" and the question was legitimately answerable all along. If a
+genuinely uncovered fact about a short-chunk entity can land that low, no
+scalar threshold is guaranteed to separate every future case correctly.
+
+The more durable fix would move past a single distance number entirely —
+something like a second check that verifies the *specific fact requested*
+appears in the top chunk (closer to hybrid keyword/BM25 scoring than pure
+embedding similarity), which was on Milestone 4's menu but is a bigger
+change than the "one thing" rule for this unit allows. I stopped at the
+threshold fix because it was the change the diagnosis pointed at most
+directly and it measurably worked against every case I could test it
+against, not because I believe it's the last word on this failure mode.
+
 ## What I'd Do Differently
 
 <!-- Knowing what you know now — which of your five criteria would you write
      differently, and why?
 
      Milestone 5. -->
+
+**Criterion 3.** In Unit 1 I already suspected the risk ("a topic that
+shares more vocabulary with my corpus... could plausibly score closer to
+the boundary"), but I left it as a suspicion in the "why" instead of writing
+it into the criterion itself. Next time I'd specify in Milestone 2 that at
+least some out-of-scope test questions have to name a real entity from the
+corpus and ask an uncovered fact about it — not just questions from a
+different domain entirely. Writing that requirement into the criterion up
+front would have caught this in Unit 1 instead of Unit 2, and would have
+meant setting the threshold correctly the first time rather than needing a
+"fix" at all.
+
+**Criterion 1.** The wording ("the retrieved chunks include one that
+contains the answer") is correct, but I didn't anticipate that an automated
+scorer would naturally check the *generated answer text* instead, since
+that's the only thing `judge(question, expects, answer, results)` has an
+obvious string to compare against. That mismatch cost real time in Unit 2
+sorting out which fails were real and which were scorer artifacts. Next
+time I'd write the criterion to explicitly name what gets checked — "the top
+retrieved chunk contains X" rather than "the answer contains X" — so there's
+no ambiguity about what an automated check should actually look at.
