@@ -318,11 +318,11 @@ Cited chunk: Noise levels in Fenwick Court: Asked about this a lot so writing it
 
 | # | Criterion | Verdict | How I decided |
 |---|---|---|---|
-| 1 |  |  |  |
-| 2 |  |  |  |
-| 3 |  |  |  |
-| 4 |  |  |  |
-| 5 |  |  |  |
+| 1 | Retrieved chunk contains the answer | MET | Criterion 1 is about the retrieved chunk, not the model's phrasing, so I checked chunk text directly instead of trusting `scorer.py`'s answer-text check (which flagged some fails purely from rewording). All 5 questions have their `expects` phrase verbatim in the top-retrieved chunk, and retrieval is deterministic, so it held at 5/5 across all 3 runs. |
+| 2 | Every answer names a source | MET | Read all 15 answers (5 questions × 3 runs) directly. Every one named a source file in some form — 15/15. |
+| 3 | Gate stops out-of-corpus questions | MISSED | The original 5 unrelated-domain questions were refused 5/5, but that felt too easy given my own "why" reasoning about untested vocabulary overlap. Tightened the test to 5 real-entity questions with uncovered facts — the gate refused only 1 of 5, well under the 4-of-5 target. Calling this MISSED rather than lowering the target, since the target itself is still the right bar; the original test data just wasn't hard enough to find this. |
+| 4 | Chunks read as complete thoughts | MET | Sampled 5 chunks with `app.py chunks -n 5` and read each one — all 5 read as complete thoughts with no sentence cut in half, above the 4-of-5 target. |
+| 5 | Citations point to the right source | MET | Checked all 15 answers' cited source file against the chunk that actually contains the stated fact. Every citation pointed to the correct file, including the Fenwick/Tamsin near-duplicate-noise-document case I'd flagged as a specific risk in Milestone 4 — it never actually misattributed. |
 
 ## Diagnoses
 
