@@ -210,15 +210,79 @@ guarantees, instead of overstating it.
 
 | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
 |---|---|---|---|---|---|
-| 1. Retrieved chunk contains the answer | 4 of 5 |  |  |  |  |
-| 2. Every answer names a source | 5 of 5 |  |  |  |  |
-| 3. Gate stops out-of-corpus questions | 4 of 5 |  |  |  |  |
-| 4. | | | | | |
-| 5. | | | | | |
+| 1. Retrieved chunk contains the answer | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 2. Every answer names a source | 5 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 3. Gate stops out-of-corpus questions | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 4. Chunks read as complete thoughts | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 5. Citations point to the right source | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+
+Produced by `run_eval.py::main` (results/run_2026-09-23_1612_before.md), with
+criterion 1 and 5 verified directly against retrieved chunk text rather than
+`scorer.py`'s answer-text check — see the note under criterion 1 below.
+Criteria 3 and 4 are single deterministic measurements (the gate and the
+chunker don't vary run to run), so the same number appears in all three
+columns, same as the worked example above.
 
 <!-- Underneath, paste the REAL output for each criterion from one of your
      runs — the actual text your system produced, not a description of it.
      Name the file and function that produced it. -->
+
+**Criterion 1 — a note on scoring.** `scorer.py::judge` checks whether the
+*generated answer text* contains the `expects` phrase, and by that measure
+North Kitchen failed 3/3 runs, Aldridge Hall failed 2/3, and Fenwick Court
+failed 1/3. Reading the actual output, all of these are the model phrasing a
+correct fact differently — "11:00 am to 7:00 pm" instead of exactly
+`"11:00am to 7:00pm"`, "doubles" instead of the fuller "doubles with a
+shared bathroom," "the walls between suites are thin" instead of "thin
+walls." Criterion 1 is specifically about **the retrieved chunk**, not the
+model's phrasing of it, so I checked chunk text directly instead
+(`store.py::search`, verified in a one-off script) — every one of the 5
+questions has its `expects` phrase verbatim in its top-retrieved chunk, and
+retrieval is deterministic, so this is 5/5 in all three runs regardless of
+how the model chose to word the answer.
+
+```
+Q: What are the timings for North Kitchen?
+  expects: '11:00am to 7:00pm'
+  FOUND in chunk (source=dining_north_kitchen.txt, distance=0.314):
+  'North Kitchen: Hours are 11:00am to 7:00pm weekdays. Costs one meal
+  swipe, or $13.00 cash.'
+```
+
+**Criterion 2 — real output** (from `results/run_2026-09-23_1612_before.md`,
+produced by `generate.py::answer_from_chunks`):
+
+```
+The rooms in Aldridge Hall are doubles with a shared bathroom per floor. This information comes from `housing_aldridge_hall.txt`.
+```
+
+**Criterion 3 — real output** (produced by `run_eval.py::check_out_of_scope`,
+gate logic in `gate.py::check`):
+
+```
+refused  (best distance 0.787)  What is the capital of Mongolia?
+refused  (best distance 0.915)  How do I change the oil in a diesel engine?
+refused  (best distance 0.846)  Who won the 1994 World Cup?
+refused  (best distance 0.848)  What is the recommended dosage of ibuprofen for a headache?
+refused  (best distance 0.863)  How do I write a for loop in Rust?
+```
+
+**Criterion 4 — real output** (from Milestone 3's `python app.py chunks -n 5`,
+produced by `chunker.py::split_documents` — unchanged since then):
+
+```
+Chunk 3  |  source: course_phys_130_workload.txt#0
+Workload for PHYS 130 Mechanics: People keep asking so: 7 hours a week, plus 3 on lab weeks. That's real time, not optimistic time.
+```
+
+**Criterion 5 — real output** (`generate.py::answer_from_chunks`, retrieved
+chunk from `store.py::search`):
+
+```
+Answer: Yes, you should expect noise at Fenwick Court due to thin walls between suites and kitchenettes that carry sound (housing_fenwick_court_noise.txt).
+
+Cited chunk: Noise levels in Fenwick Court: Asked about this a lot so writing it down. Thin walls between suites; the kitchenettes carry sound.
+```
 
 ## Verdicts
 
