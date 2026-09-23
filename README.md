@@ -344,6 +344,30 @@ Cited chunk: Noise levels in Fenwick Court: Asked about this a lot so writing it
 
      Milestone 3. -->
 
+**Criterion 3 — the only miss.** Stage: **embedding/retrieval** — specifically
+the distance signal the gate makes its refuse/pass decision from.
+
+Mechanism: all 4 questions that slipped through the gate name a real corpus
+entity directly — "Aldridge Hall," "North Kitchen," "Fenwick Court," "campus
+shuttle." The embedding model represents topical/entity similarity strongly:
+a question about Aldridge Hall embeds close to Aldridge Hall's own chunks
+almost regardless of *which* fact about Aldridge Hall is being asked, because
+entity-name overlap dominates the embedding distance. Distance measures "is
+this the same subject as the question," not "does this chunk answer this
+specific question" — those are different things, and the gate can't tell
+them apart because it only ever sees one number. For the original
+unrelated-domain questions (Mongolia, Rust) there was no entity overlap
+pulling the distance down at all, so the gate looked much stronger than it
+actually is.
+
+This is one problem, not four: every miss shares the exact same mechanism
+(a named real entity anchors the embedding regardless of the specific fact
+asked), not four unrelated causes. The one question that *was* caught —
+health center dental care, at 0.620 — is the same mechanism partially
+failing to save it; the entity anchor there (`health_center.txt`) just
+happened to be short enough on unrelated content that the distance landed
+barely on the refuse side of 0.6.
+
 ## The Improvement
 
 **What I changed:**
