@@ -40,10 +40,14 @@ TOP_K = 5               # how many chunks to pull back per question
 #
 # LOWER IS BETTER: 0.3 is a close match, 0.9 is unrelated.
 #
-# 0.6 is a reasonable starting point, not a right answer. Milestone 4 has you
-# measure your own two groups of distances and put the cutoff in the gap.
-# Most corpora land somewhere between 0.45 and 0.75.
-THRESHOLD = 0.6
+# Unit 2's improvement: lowered from 0.6 to 0.33. The original 0.6 was set
+# against unrelated-domain questions (Mongolia, Rust) that never seriously
+# tested the boundary. Against harder questions that name a real corpus
+# entity but ask an uncovered fact, 0.6 let 4 of 5 through. 0.33 sits between
+# the highest in-scope distance measured (0.286) and the lowest hard
+# out-of-scope distance (0.377) -- see criteria.md criterion 3's revision and
+# the README's Unit 2 "The Improvement" section for the full before/after.
+THRESHOLD = 0.33
 
 
 # ─── Models ──────────────────────────────────────────────────────────────────

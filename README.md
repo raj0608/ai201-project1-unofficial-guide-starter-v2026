@@ -370,12 +370,15 @@ barely on the refuse side of 0.6.
 
 ## The Improvement
 
-**What I changed:**
+**What I changed:** Lowered `THRESHOLD` in `config.py` from 0.6 to 0.33 — one line, nothing else touched.
 
-**Why I picked it:**
-
-<!-- Connect it to a specific diagnosis above in one sentence. If you can't,
-     you picked a fix because it sounded impressive. -->
+**Why I picked it:** The diagnosis traced the miss to the distance signal
+itself (a real entity name anchors the embedding close regardless of
+whether the specific fact is covered), and tuning the relevance gate is one
+of the options the assignment names for a diagnosis that points somewhere
+specific. 0.33 sits between the highest distance any legitimate in-scope
+question measured (0.286) and the lowest distance any hard out-of-scope
+question measured (0.377).
 
 ### Run Log — After
 
@@ -384,11 +387,27 @@ barely on the refuse side of 0.6.
 
 | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
 |---|---|---|---|---|---|
-| 1. Retrieved chunk contains the answer | 4 of 5 |  |  |  |  |
-| 2. Every answer names a source | 5 of 5 |  |  |  |  |
-| 3. Gate stops out-of-corpus questions | 4 of 5 |  |  |  |  |
-| 4. | | | | | |
-| 5. | | | | | |
+| 1. Retrieved chunk contains the answer | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 2. Every answer names a source | 5 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 3. Gate stops out-of-corpus questions | 4 of 5 (revised) | 5/5 | 5/5 | 5/5 | MET |
+| 4. Chunks read as complete thoughts | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 5. Citations point to the right source | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+
+Produced by `run_eval.py::main`, `results/run_2026-09-23_1637_after.md`.
+Criteria 1, 2, 4, 5 are unchanged from before — same distances, same
+answers, same citations — since the threshold only affects criterion 3's
+gate decision.
+
+**Criterion 3 — real output, after:**
+
+```
+refused  (best distance 0.620)  Does the health center offer dental care?
+refused  (best distance 0.533)  Does North Kitchen have vegan options?
+refused  (best distance 0.399)  Does Aldridge Hall have wifi in the dorm rooms?
+refused  (best distance 0.377)  Is there parking available at Fenwick Court?
+refused  (best distance 0.514)  Is the campus shuttle wheelchair accessible?
+-> gate refused 5 of 5
+```
 
 **Did it help?**
 
@@ -398,6 +417,35 @@ barely on the refuse side of 0.6.
      tell.
 
      Milestone 4. -->
+
+Yes, on the criterion 3 test specifically: the gate went from refusing 1 of
+5 to 5 of 5, with no regression on any of the other four criteria (same
+distances, same citations, same source-naming behavior, verified against
+the after-run transcript).
+
+But I don't want to overstate this. The threshold was chosen using
+knowledge of the exact 10 distances (5 in-scope, 5 hard out-of-scope) it now
+needs to separate — tuning a cutoff to fit the data you're about to
+re-report it against is a fair thing to be suspicious of. So before calling
+this "fixed," I checked two genuinely uncovered facts that were **not** part
+of picking 0.33 — "Does Morrow House have a fitness center on site?"
+(confirmed no mention of gym/fitness anywhere in the corpus) and "Is there a
+gluten-free station at Kestrel Commons?" (gluten-free only appears in a
+different dining hall's document). Both were let through at the old 0.6
+threshold (0.436 and 0.442) and both are correctly refused at 0.33. That's
+real, if thin, evidence the fix generalizes past the exact questions it was
+tuned on — two data points, not a guarantee.
+
+I also stress-tested the other direction: could a lower threshold now
+refuse a question it should answer? I tried alternate phrasings of all 5
+in-scope questions ("When is North Kitchen open?", "Is Fenwick Court
+noisy?", etc.) — every one stayed well under 0.33 (max 0.253), so there's a
+real margin, not a razor's edge. And one candidate held-out question I
+almost used as a counter-example — "Does Innisfree Hall have air
+conditioning?" — turned out to be a legitimate in-scope question after I
+actually read the document (it says "no air conditioning" directly), which
+was a useful reminder to verify a question is genuinely uncovered before
+trusting a low distance as a failure.
 
 ## What's Still Broken
 
